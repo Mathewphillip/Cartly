@@ -9,6 +9,6 @@ import { ReservationService } from './reservation.service.js';
   imports: [AuthModule, InventoryModule],
   controllers: [CartController],
   providers: [CartService, ReservationService],
-  exports: [CartService],
+  exports: [CartService, ReservationService],
 })
 export class CartModule {}

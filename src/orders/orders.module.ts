@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from '../auth/auth.module.js';
-import { CartModule } from '../cart/cart.module.js';
-import { InventoryModule } from '../inventory/inventory.module.js';
-import { CouponsModule } from '../coupons/coupons.module.js';
-import { OrdersController } from './orders.controller.js';
 import { OrdersService } from './orders.service.js';
+import { OrdersController } from './orders.controller.js';
+import { InventoryModule } from '../inventory/inventory.module.js';
+import { CartModule } from '../cart/cart.module.js';
+import { CouponsModule } from '../coupons/coupons.module.js';
 
 @Module({
-  imports: [AuthModule, CartModule, InventoryModule, CouponsModule],
+  imports: [InventoryModule, CartModule, CouponsModule],
   controllers: [OrdersController],
   providers: [OrdersService],
   exports: [OrdersService],

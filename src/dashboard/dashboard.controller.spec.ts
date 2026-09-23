@@ -18,7 +18,7 @@ describe('Dashboard API (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [DashboardModule, PrismaModule],
+      imports: [PrismaModule, DashboardModule],
       providers: [
         {
           provide: ConfigService,

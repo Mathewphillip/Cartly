@@ -1,9 +1,8 @@
-import { Module } from '@nestjs/common';
-import { AuthModule } from '../auth/auth.module.js';
+import { Module, Global } from '@nestjs/common';
 import { PrismaService } from './prisma.service.js';
 
+@Global()
 @Module({
-  imports: [AuthModule],
   providers: [PrismaService],
   exports: [PrismaService],
 })
