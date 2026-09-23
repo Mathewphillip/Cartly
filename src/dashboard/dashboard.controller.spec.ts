@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../app.module.js';
+import { DashboardModule } from './dashboard.module.js';
+import { PrismaModule } from '../prisma/prisma.module.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { ConfigModule } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Role, OrderStatus, PaymentStatus, MovementReason } from '@prisma/client';
 import { vi, expect, describe, it, beforeAll, afterAll } from 'vitest';
@@ -16,7 +18,7 @@ describe('Dashboard API (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [DashboardModule, PrismaModule, ConfigModule.forRoot({ isGlobal: true })],
     }).compile();
 
     app = moduleFixture.createNestApplication();
