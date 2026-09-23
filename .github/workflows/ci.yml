@@ -38,6 +38,11 @@ jobs:
     - name: Generate Prisma Client
       run: npx prisma generate
 
+    - name: Push Database Schema
+      run: npx prisma db push
+      env:
+        DATABASE_URL: postgresql://cartly:cartly_password@localhost:5433/cartly_db?schema=public
+
     - name: Run Lint
       run: npm run lint
 
@@ -46,3 +51,7 @@ jobs:
 
     - name: Run Unit Tests
       run: npm run test
+      env:
+        DATABASE_URL: postgresql://cartly:cartly_password@localhost:5433/cartly_db?schema=public
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
