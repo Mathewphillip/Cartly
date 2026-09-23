@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from '../auth/auth.module.js';
-import { ProductsController } from './products.controller.js';
 import { ProductsService } from './products.service.js';
+import { ProductsController } from './products.controller.js';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
-  imports: [AuthModule],
+  imports: [CacheModule.register()],
   controllers: [ProductsController],
   providers: [ProductsService],
   exports: [ProductsService],
