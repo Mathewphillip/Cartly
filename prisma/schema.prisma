@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  carts        Cart[]
+  orders       Order[]
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+}
+
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  description String?
+  sku         String    @unique
+  price       Decimal   @db.Decimal(10, 2)
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  active      Boolean   @default(true)
+  isDeleted   Boolean   @default(false)
+  lowStockThreshold Int @default(10)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  stockMovements StockMovement[]
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+}
+
+enum MovementReason {
+  INITIAL_STOCK
+  PURCHASE
+  RESTOCK
+  ORDER
+  RETURN
+  ADJUSTMENT
+  CANCELLATION
+}
+
+model StockMovement {
+  id             String         @id @default(uuid())
+  productId      String
+  product        Product        @relation(fields: [productId], references: [id])
+  quantityChange Int
+  reason         MovementReason
+  reference      String?        // e.g., Order ID or manual adjustment note
+  createdAt      DateTime       @default(now())
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique // One active cart per customer
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PROCESSING
+  SHIPPED
+  COMPLETED
+  CANCELLED
+  PAYMENT_FAILED
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  status        OrderStatus @default(PENDING_PAYMENT)
+  subtotal      Decimal     @db.Decimal(10, 2)
+  discount      Decimal     @db.Decimal(10, 2) @default(0.00)
+  total         Decimal     @db.Decimal(10, 2)
+  couponId      String?
+  coupon        Coupon?     @relation(fields: [couponId], references: [id])
+  paymentStatus String      @default("PENDING") // Tracks provider specific status
+  items         OrderItem[]
+  payments      Payment[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model OrderItem {
+  id                  String   @id @default(uuid())
+  orderId             String
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId           String
+  product             Product  @relation(fields: [productId], references: [id])
+  productNameSnapshot String
+  unitPriceSnapshot   Decimal  @db.Decimal(10, 2)
+  quantity            Int
+  lineTotal           Decimal  @db.Decimal(10, 2)
+  createdAt           DateTime @default(now())
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+model Coupon {
+  id                String       @id @default(uuid())
+  code              String       @unique
+  discountType      DiscountType
+  value             Decimal      @db.Decimal(10, 2) // e.g., 10.00 for 10% or $10
+  minOrderValue     Decimal?     @db.Decimal(10, 2)
+  usageLimit        Int?
+  usageCount        Int          @default(0)
+  expiryDate        DateTime?
+  active            Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  orders            Order[]
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  orderId         String
+  order           Order         @relation(fields: [orderId], references: [id])
+  provider        String        @default("STRIPE")
+  providerRefId   String        @unique // Stripe PaymentIntent ID
+  amount          Decimal       @db.Decimal(10, 2)
+  currency        String        @default("USD")
+  status          PaymentStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model ProcessedWebhook {
+  id        String   @id // Stripe Event ID
+  createdAt DateTime @default(now())
+}
+
