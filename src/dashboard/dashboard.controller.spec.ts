@@ -54,11 +54,11 @@ describe('Dashboard API (e2e)', () => {
 
     adminToken = jwtService.sign(
       { sub: adminUser.id, email: adminUser.email, role: adminUser.role },
-      { secret: process.env.JWT_ACCESS_SECRET || 'access_secret', expiresIn: '1h' }
+      { secret: process.env.JWT_ACCESS_SECRET || 'secret', expiresIn: '1h' }
     );
     customerToken = jwtService.sign(
       { sub: customerUser.id, email: customerUser.email, role: customerUser.role },
-      { secret: process.env.JWT_ACCESS_SECRET || 'access_secret', expiresIn: '1h' }
+      { secret: process.env.JWT_ACCESS_SECRET || 'secret', expiresIn: '1h' }
     );
   });
 
