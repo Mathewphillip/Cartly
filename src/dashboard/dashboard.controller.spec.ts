@@ -4,7 +4,7 @@ import request from 'supertest';
 import { DashboardModule } from './dashboard.module.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Role, OrderStatus, PaymentStatus, MovementReason } from '@prisma/client';
 import { vi, expect, describe, it, beforeAll, afterAll } from 'vitest';
@@ -18,7 +18,13 @@ describe('Dashboard API (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [DashboardModule, PrismaModule, ConfigModule.forRoot({ isGlobal: true })],
+      imports: [DashboardModule, PrismaModule],
+      providers: [
+        {
+          provide: ConfigService,
+          useValue: { get: vi.fn().mockReturnValue('secret') },
+        },
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();

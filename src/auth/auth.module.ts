@@ -4,6 +4,7 @@ import { AuthService } from './auth.service.js';
 import { UsersModule } from '../users/users.module.js';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 
 const passportModule = PassportModule.register({ defaultStrategy: 'jwt' });
@@ -11,6 +12,7 @@ const passportModule = PassportModule.register({ defaultStrategy: 'jwt' });
 @Global()
 @Module({
   imports: [
+    ConfigModule,
     UsersModule,
     passportModule,
     JwtModule.register({
